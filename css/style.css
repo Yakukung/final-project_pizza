@@ -1,0 +1,232 @@
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+.navbar{
+    width: 100%;
+    height: auto;
+    top: -10px;
+    border-radius: 0 0 50px 50px;
+    background-color: #820300;
+    display: flex;
+    justify-content: space-between; 
+    & .nav-user{
+        font-size: 1rem;
+        & h1{
+            font-size: 1rem;
+            margin-right: 3rem;
+            color: #f7b82f;
+        }
+        & .user-image{
+            padding-left: 3.5rem;
+            font-size: 2rem;
+            color: #F5F5F7;
+        }
+    }
+    & .logo img{
+        width: 100px;
+        margin-left: 3rem;
+        padding-top: 0.5rem;
+    }
+    & .basket{
+        margin-left: auto; 
+        margin-right: 1rem;
+        padding-top: 1rem;
+        &  .btn-basket{
+            font-size: 2.3rem;
+            color: #F5F5F7;
+        }
+        &  .btn-box{
+            font-size: 2rem;
+            color: #F5F5F7;
+        }
+    }
+}
+.container-login {
+    max-width: 100%;
+    height: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    & .card-login{
+        width: 40%;
+        height: 650px;
+        padding: 2rem;
+        margin: 1rem;
+        box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.2);
+        border-radius: 90px;
+        overflow: hidden;
+        border: none;
+        background-color:rgb(255, 252, 252, 0.9);
+        backdrop-filter: blur(10px); /* ปรับค่าตามความต้องการ */
+    }
+        & h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        & form {
+            display: flex;
+            flex-direction: column;
+        }
+        & label {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        & .logo-login {
+            text-align: center;
+            & img {
+                 width: 250px;
+            }
+        }
+    
+    }
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+select {
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 15px;
+}
+
+button[type="submit"] {
+    background-color: #007bff;
+    color: #fff;
+    padding: 10px;
+    border: none;
+    border-radius: 15px;
+    cursor: pointer;
+}
+
+button[type="submit"]:hover {
+    background-color: #0056b3;
+}
+
+.error-message {
+    color: #ff0000;
+    margin-top: 10px;
+    text-align: center;
+}
+.container-advert{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+   & .card-img-advert{
+      width: 100%;
+   }
+        & .slideshow-grid {
+            display: grid;
+            grid-template-columns: auto auto auto;
+            gap: 10px;
+            overflow: hidden;
+        }
+
+        & .slide {
+            width: 100%;
+        
+        }
+
+       & .slide img {
+            width: 100%;
+            text-align: center;
+            height: 380px;
+            object-fit: cover;
+            aspect-ratio: 36/12;
+            border-radius: 65px;
+            transition: transform 0.4s ease-in-out;
+        }
+}
+.container-pizza{
+    width: 100%;
+    &  .card-grid-pizza{
+        width: 100%;
+        height: auto;
+        display: grid;
+        grid-template-columns: auto auto auto auto;
+        gap: 1.5rem;
+        justify-content: center;
+        align-items: center;
+        padding: 3rem;
+        & .card-column {
+            max-width: 400px;
+            height: 400px;
+            padding: 1rem;
+            transition: transform 0.6s , box-shadow 0.3s ;
+            box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.2);
+            border-radius: 30px;
+            overflow: hidden;
+            border: none !important;
+        }
+        & .card-img-pizza {
+            text-align: center;
+            width: 320px;
+            height: auto;
+            object-fit: cover;
+            aspect-ratio: 3/2;
+        }
+        & .card-column:hover {
+            transform: scale(1.10);
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.4);
+        }
+        & .card-body{
+            height: 150px;
+            padding: 1rem;
+            & h1{
+                font-size: 1.5rem;
+                font-weight: bold;
+            }
+            & h2{
+                height: 60px;
+                font-size: 1rem;
+                font-weight: normal;
+            }
+            & .price_and_btn{
+                display: flex;
+                justify-content: space-around;
+                align-items: center;
+                & h3{
+                    font-weight: bold;
+                    color: #ca415d;
+                    
+                }
+                & .btn-add-product{
+                    margin-left: 1rem;
+                }
+            }
+        }
+    }
+}
+
+.container-owner {
+    max-width: 100%;
+    height: 100vh;
+ 
+}
+.container-pizza_item{
+    max-width: 100%;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    & .card-pizza_item{
+        background-color: #FAFAFA;
+        margin: 2rem;
+        width: 600px;
+        height: auto;
+        padding: 2rem;
+        border-radius: 60px;
+        
+    }
+}
+#total-price {
+    color: #4aa774;
+
+}
+
+.container-payment{
+    width: 100%;
+}

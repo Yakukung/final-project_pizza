@@ -4,6 +4,8 @@ body {
     padding: 0;
 }
 .navbar{
+    position: sticky;
+    z-index: 1000; /* เพิ่มความสูงของ Z-index เพื่อให้ Navbar อยู่บนสุด */
     width: 100%;
     height: auto;
     top: -10px;

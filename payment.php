@@ -155,9 +155,13 @@ if (isset($_GET['user_name']) && isset($_GET['total'])) {
                     ?>
                 </tbody>
             </table>
-            <p><strong>ราคารวมทั้งหมด: <?php echo $total; ?></strong></p>
-            <div class="row justify-content-center">
-                <button type="submit" class="btn btn-primary">ยืนยันการสั่งซื้อ</button>
+            <div class="total" style="display: flex; justify-content: end; align-items: center;">
+                <p><strong>ราคารวมทั้งหมด: 
+                    <div class="bath" style="color: #4aa774; font-size: 2rem; margin: 0rem 2rem 1rem 0.5rem;"><?php echo $total; ?> บาท</div>
+                </strong></p>
+            </div>
+            <div class="row" style="width: 13%; margin-left: 80%; margin-top: -1rem;">
+                    <button type="submit" class="btn btn-primary">ยืนยันการสั่งซื้อ</button>
             </div>
         </div>
      </form>

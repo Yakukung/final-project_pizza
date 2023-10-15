@@ -79,32 +79,71 @@ if (isset($_GET['user_name']) && isset($_GET['total'])) {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="css/style.css">
 </head>
+<div class="navbar">
+     <div class="logo">
+     <a href="home.php?user_name=<?php echo $user_name; ?>">
+         <img src="css/LOGOpizza.png"alt="">
+     </a>
+     </div>
+     <div class="basket">
+     <a class="btn btn-box" href="order.php?user_name=<?php echo $user_name; ?>">
+         <i class="bi bi-box2-fill"></i>
+            <?php
+                    // ดึงข้อมูลออเดอร์จากฐานข้อมูล
+                $sql = "SELECT `Order`.*, SUM(Basket.amount * Item.Price) AS total_amount
+                FROM `Order`
+                INNER JOIN User ON `Order`.user_id = User.user_id
+                LEFT JOIN Basket ON `Order`.order_id = Basket.order_id
+                LEFT JOIN Item ON Basket.item_id = Item.item_id
+                WHERE User.user_name = ?
+                GROUP BY `Order`.order_id
+                ORDER BY `Order`.order_id DESC";
 
-<body>
-    <div class="navbar">
-        <div class="logo">
-            <a href="home.php?user_name=<?php echo $user_name; ?>">
-                <img src="css/LOGOpizza.png" alt="">
-            </a>
-        </div>
-        <div class="basket">
-            <a class="btn btn-box" href="order.php?user_name=<?php echo $user_name; ?>">
-                <i class="bi bi-box2-fill"></i>
-            </a>
-            <a class="btn btn-basket" href="basket.php?user_name=<?php echo $user_name; ?>">
-                <i class="bi bi-basket3-fill"></i>
-            </a>
-        </div>
-        <div class="nav-user">
-            <a class="user-image" href="login.php">
-                <i class="bi bi-person-circle"></i>
-            </a>
-            <a class="user-name" href="login.php" style="text-decoration: none;">
-                <h1>สวัสดี, <?php echo $user_name; ?>!</h1>
-            </a>
-        </div>
-    </div>
+                $stmt = $conn->prepare($sql);
+                $stmt->bind_param("s", $user_name);
+                $stmt->execute();
+                $result = $stmt->get_result();
 
+                // นับจำนวนรายการออเดอร์
+                $order_count = $result->num_rows;
+
+                if ($order_count > 0){
+                    echo '<span class="order-count">' .$order_count. '</span>';
+                }
+            ?>
+           
+    </a>
+
+         <a class="btn btn-basket" href="basket.php?user_name=<?php echo $user_name; ?>">
+             <i class="bi bi-basket-fill"></i>
+             <?php
+                         // ดึงจำนวนสินค้าในตะกร้าของผู้ใช้
+                $sql_count_items = "SELECT COUNT(*) AS item_count FROM Basket
+                INNER JOIN `Order` ON Basket.order_id = `Order`.order_id
+                INNER JOIN User ON `Order`.user_id = User.user_id
+                WHERE User.user_name = ?";
+                $stmt_count_items = $conn->prepare($sql_count_items);
+                $stmt_count_items->bind_param("s", $user_name);
+                $stmt_count_items->execute();
+                $result_count_items = $stmt_count_items->get_result();
+
+                    if ($result_count_items->num_rows > 0) {
+                        $count_row = $result_count_items->fetch_assoc();
+                        $item_count = $count_row['item_count'];
+                        echo '<span class="item-count">' . $item_count . '</span>';
+                    }
+                ?>
+          </a>
+     </div>
+     <div class="nav-user">
+        <a class="user-image" href="login.php">
+            <i class="bi bi-person-circle"></i>
+        </a>
+        <a class="user-name" href="login.php"style="text-decoration: none;" >
+           <h1>สวัสดี, <?php echo $user_name; ?>!</h1>
+        </a>
+     </div>
+ </div>
     <div class="container mt-5">
     <form method="post">
         <div class="row justify-content-center" style="background-color: #FAFAFA; padding: 2rem; border-radius: 65px; margin: 2rem;">

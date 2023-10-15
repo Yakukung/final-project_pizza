@@ -46,7 +46,7 @@
                 $result_check_order = $conn->query($sql_check_order);
         
                 if ($result_check_order->num_rows == 0) {
-                    // ถ้าไม่มีรายการสั่งซื้อ ให้สร้างบันทึกใหม่ในตาราง "Order"
+                    // ถ้าไม่มีรายการสั่งซื้อ ให้สร้างบันทึกใหม่ในตาราง "Order" โดยใช้ NOW() เพื่อรวมวันที่และเวลา
                     $sql_insert_order = "INSERT INTO `Order` (`user_id`, `order_date`, `order_name`, `order_phone`, `order_address`)
                                         VALUES ($user_id, NOW(), '$user_name', '$user_phone', '$user_address')";
                     $conn->query($sql_insert_order);
@@ -57,9 +57,7 @@
             } else {
                 echo '<div class="alert alert-danger text-center" role="alert">เข้าสู่ระบบไม่สำเร็จ</div>';
             }
-        }
-        
-        
+        }  
     }
     $conn->close();
 ?>

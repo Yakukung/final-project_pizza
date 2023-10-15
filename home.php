@@ -25,11 +25,53 @@ $user_name = $_GET['user_name'];
      </a>
      </div>
      <div class="basket">
-          <a class="btn btn-box" href="order.php?user_name=<?php echo $user_name; ?>">
-             <i class="bi bi-box2-fill"></i>
-          </a>
+     <a class="btn btn-box" href="order.php?user_name=<?php echo $user_name; ?>">
+         <i class="bi bi-box2-fill"></i>
+            <?php
+                    // ดึงข้อมูลออเดอร์จากฐานข้อมูล
+                $sql = "SELECT `Order`.*, SUM(Basket.amount * Item.Price) AS total_amount
+                FROM `Order`
+                INNER JOIN User ON `Order`.user_id = User.user_id
+                LEFT JOIN Basket ON `Order`.order_id = Basket.order_id
+                LEFT JOIN Item ON Basket.item_id = Item.item_id
+                WHERE User.user_name = ?
+                GROUP BY `Order`.order_id
+                ORDER BY `Order`.order_id DESC";
+
+                $stmt = $conn->prepare($sql);
+                $stmt->bind_param("s", $user_name);
+                $stmt->execute();
+                $result = $stmt->get_result();
+
+                // นับจำนวนรายการออเดอร์
+                $order_count = $result->num_rows;
+
+                if ($order_count > 0){
+                    echo '<span class="order-count">' .$order_count. '</span>';
+                }
+            ?>
+           
+    </a>
+
          <a class="btn btn-basket" href="basket.php?user_name=<?php echo $user_name; ?>">
-             <i class="bi bi-basket3-fill"></i>
+             <i class="bi bi-basket-fill"></i>
+             <?php
+                         // ดึงจำนวนสินค้าในตะกร้าของผู้ใช้
+                $sql_count_items = "SELECT COUNT(*) AS item_count FROM Basket
+                INNER JOIN `Order` ON Basket.order_id = `Order`.order_id
+                INNER JOIN User ON `Order`.user_id = User.user_id
+                WHERE User.user_name = ?";
+                $stmt_count_items = $conn->prepare($sql_count_items);
+                $stmt_count_items->bind_param("s", $user_name);
+                $stmt_count_items->execute();
+                $result_count_items = $stmt_count_items->get_result();
+
+                    if ($result_count_items->num_rows > 0) {
+                        $count_row = $result_count_items->fetch_assoc();
+                        $item_count = $count_row['item_count'];
+                        echo '<span class="item-count">' . $item_count . '</span>';
+                    }
+                ?>
           </a>
      </div>
      <div class="nav-user">

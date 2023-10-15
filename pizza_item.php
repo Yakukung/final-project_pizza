@@ -131,24 +131,58 @@ $conn->close();
 </head>
 <body>
 <div class="navbar">
-    <div class="logo">
-         <a href="home.php?user_name=<?php echo $user_name; ?>">
-        <img src="css/LOGOpizza.png"alt="">
+     <div class="logo">
+     <a href="home.php?user_name=<?php echo $user_name; ?>">
+         <img src="css/LOGOpizza.png"alt="">
+     </a>
      </div>
-    <div class="basket">
-        <a class="btn btn-basket" href="basket.php?user_name=<?php echo $user_name; ?>">
-            <i class="bi bi-basket3-fill"></i>
-        </a>
-    </div>
-    <div class="nav-user">
+     <div class="basket">
+     <a class="btn btn-box" href="order.php?user_name=<?php echo $user_name; ?>">
+         <i class="bi bi-box2-fill"></i>
+            <?php
+                    // ดึงข้อมูลออเดอร์จากฐานข้อมูล
+                $sql = "SELECT `Order`.*, SUM(Basket.amount * Item.Price) AS total_amount
+                FROM `Order`
+                INNER JOIN User ON `Order`.user_id = User.user_id
+                LEFT JOIN Basket ON `Order`.order_id = Basket.order_id
+                LEFT JOIN Item ON Basket.item_id = Item.item_id
+                WHERE User.user_name = ?
+                GROUP BY `Order`.order_id
+                ORDER BY `Order`.order_id DESC";
+
+                $stmt = $conn->prepare($sql);
+                $stmt->bind_param("s", $user_name);
+                $stmt->execute();
+                $result = $stmt->get_result();
+
+                // นับจำนวนรายการออเดอร์
+                $order_count = $result->num_rows;
+            ?>
+            <?php if ($order_count > 0): ?>
+                <span class="order-count"><?php echo $order_count; ?></span>
+            <?php endif; ?>
+    </a>
+
+         <a class="btn btn-basket" href="basket.php?user_name=<?php echo $user_name; ?>">
+             <i class="bi bi-basket-fill"></i>
+             <?php
+        if ($result_count_items->num_rows > 0) {
+            $count_row = $result_count_items->fetch_assoc();
+            $item_count = $count_row['item_count'];
+            echo '<span class="item-count">' . $item_count . '</span>';
+        }
+        ?>
+          </a>
+     </div>
+     <div class="nav-user">
         <a class="user-image" href="login.php">
             <i class="bi bi-person-circle"></i>
         </a>
-        <a class="user-name" href="login.php" style="text-decoration: none;">
-            <h1>สวัสดี, <?php echo $user_name; ?></h1>
+        <a class="user-name" href="login.php"style="text-decoration: none;" >
+           <h1>สวัสดี, <?php echo $user_name; ?>!</h1>
         </a>
-    </div>
-</div>
+     </div>
+ </div>
 <div class="container-pizza_item">
     <div class="card-pizza_item">
         <?php
@@ -198,9 +232,9 @@ $conn->close();
                 <!-- เพิ่ม input hidden สำหรับราคาขนาดและขอบ -->
                 <input type="hidden" id="size_price" name="size_price" value="0">
                 <input type="hidden" id="crust_price" name="crust_price" value="0">
-                    <div class="card_total">
-                        <p>ราคารวมทั้งหมด</p>
-                        <div id="total" style="font-size: 2rem;  font-weight: bold; color: #4aa774;">฿<?php echo $pizza_price; ?></div>
+                    <div class="card_total" style="font-weight: bold;">
+                        <p>ราคา:</p>
+                        <div id="total" style="font-size: 2rem;  font-weight: bold; color: #4aa774; margin-top: -1rem;">฿<?php echo $pizza_price; ?></div>
                     </div>
                         <div class="text-center">
                             <button type="submit" class="btn btn-primary">เพิ่มใส่ตะกร้า</button>

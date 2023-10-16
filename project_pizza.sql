@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Oct 13, 2023 at 04:46 PM
+-- Generation Time: Oct 17, 2023 at 01:25 AM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -33,15 +33,6 @@ CREATE TABLE `Basket` (
   `item_id` int(11) NOT NULL,
   `amount` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
-
---
--- Dumping data for table `Basket`
---
-
-INSERT INTO `Basket` (`basket_id`, `order_id`, `item_id`, `amount`) VALUES
-(6, 1, 1, 3),
-(7, 1, 2, 2),
-(8, 1, 3, 2);
 
 -- --------------------------------------------------------
 
@@ -78,15 +69,6 @@ CREATE TABLE `Item` (
   `Price` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
---
--- Dumping data for table `Item`
---
-
-INSERT INTO `Item` (`item_id`, `pizza_id`, `size_id`, `crust_id`, `Price`) VALUES
-(1, 5, 1, 1, 379),
-(2, 1, 4, 3, 349),
-(3, 12, 2, 3, 369);
-
 -- --------------------------------------------------------
 
 --
@@ -104,14 +86,6 @@ CREATE TABLE `Order` (
   `payment_status` varchar(255) DEFAULT NULL,
   `total` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
-
---
--- Dumping data for table `Order`
---
-
-INSERT INTO `Order` (`order_id`, `user_id`, `order_date`, `order_name`, `order_phone`, `order_address`, `status`, `payment_status`, `total`) VALUES
-(1, 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(2, 3, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -190,8 +164,10 @@ CREATE TABLE `User` (
 
 INSERT INTO `User` (`user_id`, `user_name`, `email`, `password`, `address`, `phone`, `position`) VALUES
 (1, 'อัษฎาวุธ', 'kkk@gmail.com', '1234', 'อินเตอร์แมนชั่น', '0959379712', '2'),
-(2, 'Aj\'M', 'ajm@gmail.com', '1234', 'มหาสารคาม', '1234567890', '1'),
-(3, 'กฤษนัย', 'ttt@gmail.com', '1234', 'ไม่รู้ววว', '0987654321', '2');
+(2, 'เจ้าของร้าน', 'ajm@gmail.com', '1234', 'มหาสารคาม', '1234567890', '1'),
+(3, 'กฤตสนัย', 'ttt@gmail.com', '1234', 'ไม่รู้วววว', '0987654321', '2'),
+(4, 'ภูริ', 'puri@gmail.com', '1234', 'หอใน', '0981125167', '2'),
+(5, 'สิริวัฒน์', 'siriwat@gmail.com', '1234', 'ไม่รู้ววววว', '0829835221', '2');
 
 --
 -- Indexes for dumped tables
@@ -253,7 +229,7 @@ ALTER TABLE `User`
 -- AUTO_INCREMENT for table `Basket`
 --
 ALTER TABLE `Basket`
-  MODIFY `basket_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `basket_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `Crust`
@@ -265,13 +241,13 @@ ALTER TABLE `Crust`
 -- AUTO_INCREMENT for table `Item`
 --
 ALTER TABLE `Item`
-  MODIFY `item_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `item_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `Order`
 --
 ALTER TABLE `Order`
-  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `Pizza`
@@ -289,7 +265,7 @@ ALTER TABLE `Size`
 -- AUTO_INCREMENT for table `User`
 --
 ALTER TABLE `User`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- Constraints for dumped tables
@@ -300,7 +276,8 @@ ALTER TABLE `User`
 --
 ALTER TABLE `Basket`
   ADD CONSTRAINT `basket_fk_item` FOREIGN KEY (`item_id`) REFERENCES `Item` (`item_id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `basket_fk_order` FOREIGN KEY (`order_id`) REFERENCES `Order` (`order_id`) ON DELETE CASCADE;
+  ADD CONSTRAINT `basket_fk_order` FOREIGN KEY (`order_id`) REFERENCES `Order` (`order_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_basket_order` FOREIGN KEY (`order_id`) REFERENCES `Order` (`order_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `Item`

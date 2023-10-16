@@ -1,7 +1,9 @@
 <?php
 require_once "dbconfig.php";
 
-$user_name = $_GET['user_name'];
+    $user_name= $_GET['user_name'];
+    // ใช้ $order_id ในการเรียกข้อมูลที่คุณต้องการ
+    $new_order_id = $_GET['order_id'];
 
 ?>
 
@@ -18,71 +20,10 @@ $user_name = $_GET['user_name'];
       
 </head>
 <body>
-<div class="navbar">
-     <div class="logo">
-     <a href="home.php?user_name=<?php echo $user_name; ?>">
-         <img src="css/LOGOpizza.png"alt="">
-     </a>
-     </div>
-     <div class="basket">
-     <a class="btn btn-box" href="order.php?user_name=<?php echo $user_name; ?>">
-         <i class="bi bi-box2-fill"></i>
-            <?php
-                    // ดึงข้อมูลออเดอร์จากฐานข้อมูล
-                $sql = "SELECT `Order`.*, SUM(Basket.amount * Item.Price) AS total_amount
-                FROM `Order`
-                INNER JOIN User ON `Order`.user_id = User.user_id
-                LEFT JOIN Basket ON `Order`.order_id = Basket.order_id
-                LEFT JOIN Item ON Basket.item_id = Item.item_id
-                WHERE User.user_name = ?
-                GROUP BY `Order`.order_id
-                ORDER BY `Order`.order_id DESC";
+<?php
+    include "navbar.php";
+?>
 
-                $stmt = $conn->prepare($sql);
-                $stmt->bind_param("s", $user_name);
-                $stmt->execute();
-                $result = $stmt->get_result();
-
-                // นับจำนวนรายการออเดอร์
-                $order_count = $result->num_rows;
-
-                if ($order_count > 0){
-                    echo '<span class="order-count">' .$order_count. '</span>';
-                }
-            ?>
-           
-    </a>
-
-         <a class="btn btn-basket" href="basket.php?user_name=<?php echo $user_name; ?>">
-             <i class="bi bi-basket-fill"></i>
-             <?php
-                         // ดึงจำนวนสินค้าในตะกร้าของผู้ใช้
-                $sql_count_items = "SELECT COUNT(*) AS item_count FROM Basket
-                INNER JOIN `Order` ON Basket.order_id = `Order`.order_id
-                INNER JOIN User ON `Order`.user_id = User.user_id
-                WHERE User.user_name = ?";
-                $stmt_count_items = $conn->prepare($sql_count_items);
-                $stmt_count_items->bind_param("s", $user_name);
-                $stmt_count_items->execute();
-                $result_count_items = $stmt_count_items->get_result();
-
-                    if ($result_count_items->num_rows > 0) {
-                        $count_row = $result_count_items->fetch_assoc();
-                        $item_count = $count_row['item_count'];
-                        echo '<span class="item-count">' . $item_count . '</span>';
-                    }
-                ?>
-          </a>
-     </div>
-     <div class="nav-user">
-        <a class="user-image" href="login.php">
-            <i class="bi bi-person-circle"></i>
-        </a>
-        <a class="user-name" href="login.php"style="text-decoration: none;" >
-           <h1>สวัสดี, <?php echo $user_name; ?>!</h1>
-        </a>
-     </div>
- </div>
  <div class="container-advert" style="margin-top: 1rem; width: 100%;">
     <div class="slideshow-grid">
         <div class="slide">
@@ -121,7 +62,7 @@ $user_name = $_GET['user_name'];
 
                              <div class="price_and_btn">
                              <h3>฿<?php echo $pizza_price; ?></h3>
-                             <a class="btn btn-add-product" href="pizza_item.php?pizza_id=<?php echo $pizza_id; ?>&user_name=<?php echo $user_name; ?>" style="margin-right: 1rem; color: white; background-color: #67927A; border: none;">
+                             <a class="btn btn-add-product" href="pizza_item.php?pizza_id=<?php echo $pizza_id; ?>&user_name=<?php echo $user_name; ?>&order_id=<?php echo $new_order_id; ?>"" style="margin-right: 1rem; color: white; background-color: #67927A; border: none;">
                                 <i class="bi bi-basket3-fill"></i> เพิ่มสินค้า
                             </a>
                         </div>

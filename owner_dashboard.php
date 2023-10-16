@@ -4,6 +4,7 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
+// ดึงรายการออร์เดอร์ที่มีค่า total ไม่เป็น NULL
 $sql = "SELECT `Order`.order_id, User.user_name,
                 GROUP_CONCAT(Pizza.pizza_name SEPARATOR ', ') as pizza_names, 
                 GROUP_CONCAT(Size.size_name SEPARATOR ', ') as size_names, 
@@ -16,13 +17,14 @@ $sql = "SELECT `Order`.order_id, User.user_name,
     INNER JOIN Basket ON `Order`.order_id = Basket.order_id
     INNER JOIN Item ON Basket.item_id = Item.item_id
     INNER JOIN Pizza ON Item.pizza_id = Pizza.pizza_id
-    INNER JOIN Size ON Pizza.pizza_id = Size.size_id
-    INNER JOIN Crust ON Pizza.pizza_id = Crust.crust_id
+    INNER JOIN Size ON Item.size_id = Size.size_id
+    INNER JOIN Crust ON Item.crust_id = Crust.crust_id
+    WHERE `Order`.total IS NOT NULL
     GROUP BY `Order`.order_id";
 
 $result = $conn->query($sql);
 
-$user_name = $_GET['user_name'];
+$user_name = $_GET['user_name']; // ต้องการ user_name ใน URL
 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["order_id"]) && isset($_POST["payment_status"]) && isset($_POST["status"])) {
     $order_id = $_POST["order_id"];
@@ -35,6 +37,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["order_id"]) && isset($
     $stmt_update_status->bind_param("ssi", $payment_status, $status, $order_id);
 
     if ($stmt_update_status->execute()) {
+        
         header("Location: owner_dashboard.php?user_name=" . $user_name);
         exit();
     } else {
@@ -47,10 +50,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["order_id"]) && isset($
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>รายการสั่งซื้อ</title>
+    <title>รายการออร์เดอร์</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
@@ -114,35 +117,31 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["order_id"]) && isset($
 
             echo '</tbody></table>';
 
-                            echo '<p class="card-text">ยอดรวมทั้งหมด: ' . $row["total"] . '</p>';
-                                         echo "<form method='POST' action='owner_dashboard.php?user_name=$user_name'>";
-                                         echo '<div class="row justify-content-center">';
-                                            echo "<input type='hidden' name='order_id' value='" . $row["order_id"] . "'>";
-                                                echo '<div class="col-3">';
-                                                echo "<label for='payment_status'>สถานะชำระเงิน</label>";
-                                                    echo "<select class='form-control' name='payment_status'>";
-                                                        echo "<option value='ยังไม่จ่าย' " . ($row["payment_status"] == "ยังไม่จ่าย" ? "selected" : "") . ">ยังไม่จ่าย</option>";
-                                                        echo "<option value='จ่ายแล้ว' " . ($row["payment_status"] == "จ่ายแล้ว" ? "selected" : "") . ">จ่ายแล้ว</option>";
-                                                    echo "</select>";
-                                                   echo '</div>';
-
-                                                echo '<div class="col-3">';
-                                                echo "<label for='status'>สถานะจัดส่ง</label>";
-                                                    echo "<select class='form-control' name='status'>";
-                                                        echo "<option value='1' " . ($row["status"] == "1" ? "selected" : "") . ">ยังไม่ส่ง</option>";
-                                                        echo "<option value='2' " . ($row["status"] == "2" ? "selected" : "") . ">ส่งแล้ว</option>";
-                                                    echo "</select>";
-                                                echo '</div>';
-                                            echo "<button type='submit' style='margin: auto;'class='btn btn-primary'>บันทึก</button>";
-                                        echo "</form>";
-                                     echo '</div>';
-                echo '</div>';
+            echo '<p class="card-text">ยอดรวมทั้งหมด: ' . $row["total"] . '</p>';
+            echo "<form method='POST' action='owner_dashboard.php?user_name=$user_name'>";
+            echo '<div class="row justify-content-center">';
+            echo "<input type='hidden' name='order_id' value='" . $row["order_id"] . "'>";
+            echo '<div class="col-3">';
+            echo "<label for='payment_status'>สถานะชำระเงิน</label>";
+            echo "<select class='form-control' name='payment_status'>";
+            echo "<option value='ยังไม่ชำระเงิน' " . ($row["payment_status"] == "ยังไม่ชำระเงิน" ? "selected" : "") . ">ยังไม่ชำระเงิน</option>";
+            echo "<option value='ชำระเงินแล้ว' " . ($row["payment_status"] == "ชำระเงินแล้ว" ? "selected" : "") . ">ชำระเงินแล้ว</option>";
+            echo "</select>";
+            echo '</div>';
+            echo '<div class="col-3">';
+            echo "<label for='status'>สถานะจัดส่ง</label>";
+            echo "<select class='form-control' name='status'>";
+            echo "<option value='1' " . ($row["status"] == "1" ? "selected" : "") . ">ยังไม่ส่ง</option>";
+            echo "<option value='2' " . ($row["status"] == "2" ? "selected" : "") . ">ส่งแล้ว</option>";
+            echo "</select>";
+            echo '</div>';
+            echo "<button type='submit' style='margin: auto;' class='btn btn-primary'>บันทึก</button>";
+            echo '</div>';
+            echo '</form>';
+            echo '</div>';
             echo '</div>';
         }
     } else {
         echo "<p>ไม่มีรายการสั่งซื้อ</p>";
     }
     ?>
-</div>
-</body>
-</html>

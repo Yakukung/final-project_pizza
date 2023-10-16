@@ -1,9 +1,10 @@
 <?php
 require_once "dbconfig.php";
 
-if (isset($_GET['pizza_id']) && isset($_GET['user_name'])) {
+if (isset($_GET['pizza_id']) && isset($_GET['user_name']) && isset($_GET['order_id'])) {
     $pizza_id = $_GET['pizza_id'];
     $user_name = $_GET['user_name'];
+    $new_order_id = $_GET['new_order_id '];
 
     $sql_pizza = "SELECT * FROM Pizza WHERE pizza_id = $pizza_id";
     $result_pizza = $conn->query($sql_pizza);
@@ -40,11 +41,11 @@ if (isset($_GET['pizza_id']) && isset($_GET['user_name'])) {
             $total = $pizza_price + $size_price + $crust_price;
 
             // หาค่า order_id จากตาราง "Order" โดยใช้ user_name
-            $sql_find_order_id = "SELECT order_id FROM `Order` WHERE user_id = (SELECT user_id FROM User WHERE user_name = ?)";
+            $sql_find_order_id = "SELECT MAX(order_id) AS order_id FROM `Order` WHERE user_id = (SELECT user_id FROM User WHERE user_name = ?)";
             $stmt_find_order_id = $conn->prepare($sql_find_order_id);
             $stmt_find_order_id->bind_param("s", $user_name);
             $stmt_find_order_id->execute();
-            $stmt_find_order_id->bind_result($order_id);
+            $stmt_find_order_id->bind_result($new_order_id);
             $stmt_find_order_id->fetch();
             $stmt_find_order_id->close();
 
@@ -54,7 +55,7 @@ if (isset($_GET['pizza_id']) && isset($_GET['user_name'])) {
                                AND item_id IN (SELECT item_id FROM Item WHERE pizza_id = ? AND size_id = ? AND crust_id = ?)";
 
             $stmt_check_item = $conn->prepare($sql_check_item);
-            $stmt_check_item->bind_param("iiii", $order_id, $pizza_id, $size_id, $crust_id);
+            $stmt_check_item->bind_param("iiii", $new_order_id, $pizza_id, $size_id, $crust_id);
             $stmt_check_item->execute();
             $stmt_check_item->store_result();
 
@@ -90,7 +91,7 @@ if (isset($_GET['pizza_id']) && isset($_GET['user_name'])) {
 
                     $sql_insert_basket = "INSERT INTO Basket (order_id, item_id, amount) VALUES (?, ?, ?)";
                     $stmt_insert_basket = $conn->prepare($sql_insert_basket);
-                    $stmt_insert_basket->bind_param("iii", $order_id, $item_id, $amount);
+                    $stmt_insert_basket->bind_param("iii", $new_order_id, $item_id, $amount);
 
                     if ($stmt_insert_basket->execute()) {
                         echo '<div class="alert alert-success text-center" role="alert">เพิ่มสินค้าลงในตะกร้าสำเร็จ!</div>';
@@ -111,7 +112,6 @@ if (isset($_GET['pizza_id']) && isset($_GET['user_name'])) {
     echo '<div class="alert alert-danger text-center" role="alert">ข้อมูลไม่ถูกต้อง</div>';
 }
 
-$conn->close();
 ?>
 
 
@@ -130,58 +130,9 @@ $conn->close();
     
 </head>
 <body>
-<div class="navbar">
-     <div class="logo">
-     <a href="home.php?user_name=<?php echo $user_name; ?>">
-         <img src="css/LOGOpizza.png"alt="">
-     </a>
-     </div>
-     <div class="basket">
-     <a class="btn btn-box" href="order.php?user_name=<?php echo $user_name; ?>">
-         <i class="bi bi-box2-fill"></i>
-            <?php
-                    // ดึงข้อมูลออเดอร์จากฐานข้อมูล
-                $sql = "SELECT `Order`.*, SUM(Basket.amount * Item.Price) AS total_amount
-                FROM `Order`
-                INNER JOIN User ON `Order`.user_id = User.user_id
-                LEFT JOIN Basket ON `Order`.order_id = Basket.order_id
-                LEFT JOIN Item ON Basket.item_id = Item.item_id
-                WHERE User.user_name = ?
-                GROUP BY `Order`.order_id
-                ORDER BY `Order`.order_id DESC";
-
-                $stmt = $conn->prepare($sql);
-                $stmt->bind_param("s", $user_name);
-                $stmt->execute();
-                $result = $stmt->get_result();
-
-                // นับจำนวนรายการออเดอร์
-                $order_count = $result->num_rows;
-            ?>
-            <?php if ($order_count > 0): ?>
-                <span class="order-count"><?php echo $order_count; ?></span>
-            <?php endif; ?>
-    </a>
-
-         <a class="btn btn-basket" href="basket.php?user_name=<?php echo $user_name; ?>">
-             <i class="bi bi-basket-fill"></i>
-             <?php
-        if ($result_count_items->num_rows > 0) {
-            $count_row = $result_count_items->fetch_assoc();
-            $item_count = $count_row['item_count'];
-            echo '<span class="item-count">' . $item_count . '</span>';
-        }
-        ?>
-          </a>
-     </div>
-     <div class="nav-user">
-        <a class="user-image" href="login.php">
-            <i class="bi bi-person-circle"></i>
-        </a>
-        <a class="user-name" href="login.php"style="text-decoration: none;" >
-           <h1>สวัสดี, <?php echo $user_name; ?>!</h1>
-        </a>
-     </div>
+<?php
+    include "navbar.php";
+?>
  </div>
 <div class="container-pizza_item">
     <div class="card-pizza_item">

@@ -1,64 +1,62 @@
 <?php
-    require_once "dbconfig.php";
+require_once "dbconfig.php";
 
-    if ($_SERVER["REQUEST_METHOD"] == "POST") {
-        $email = $_POST['email'];
-        $password = $_POST['password'];
-        $position = $_POST['position'];
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $email = mysqli_real_escape_string($conn, $_POST['email']);
+    $password = mysqli_real_escape_string($conn, $_POST['password']);
+    $position = mysqli_real_escape_string($conn, $_POST['position']);
 
-        // เพิ่มเงื่อนไขความปลอดภัยที่ดีขึ้นเพื่อป้องกันการโจมตี SQL Injection
-        $email = mysqli_real_escape_string($conn, $email);
-        $password = mysqli_real_escape_string($conn, $password);
+    $stmt = $conn->prepare("SELECT * FROM User WHERE email = ? AND password = ? AND position = ?");
+    $stmt->bind_param("sss", $email, $password, $position);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        $user_name = $row['user_name'];
+        $user_id = $row['user_id'];
 
         if ($position == '1') {
-            $sql = "SELECT * FROM User 
-                    WHERE email = '$email'
-                    AND password = '$password' 
-                    AND position = '$position'";
-            $result = $conn->query($sql);
+            header("Location: owner_dashboard.php?user_name=$user_name");
+            exit();
+        } 
+        if ($position == '2') {
+            $stmt_check_order = $conn->prepare("SELECT * FROM `Order` WHERE `user_id` = ?");
+            $stmt_check_order->bind_param("i", $user_id);
+            $stmt_check_order->execute();
+            $result_check_order = $stmt_check_order->get_result();
+        
+            if ($result_check_order->num_rows > 0) {
+                $stmt_check_order_max = $conn->prepare("SELECT MAX(order_id) AS order_id FROM `Order` WHERE `user_id` = ?");
+                $stmt_check_order_max->bind_param("i", $user_id);
+                $stmt_check_order_max->execute();
+                $result_check_order_max = $stmt_check_order_max->get_result();
 
-            if ($result->num_rows > 0) {
-                $row = $result->fetch_assoc();
-                $user_name = $row['user_name'];
-                $user_id = $row['user_id'];
-
-                header("Location: owner_dashboard.php?user_name=$user_name");
-                exit();
-            } else {
-                echo '<div class="alert alert-danger text-center" role="alert">เข้าสู่ระบบไม่สำเร็จ</div>';
-            }
-        } elseif ($position == '2') {
-            $sql = "SELECT * FROM User 
-                    WHERE email = '$email' 
-                    AND password = '$password' 
-                    AND position = '$position'";
-            $result = $conn->query($sql);
-        
-            if ($result->num_rows > 0) {
-                $row = $result->fetch_assoc();
-                $user_name = $row['user_name'];
-                $user_id = $row['user_id'];
-                $user_phone = $row['phone'];
-                $user_address = $row['address'];
-        
-                // ตรวจสอบว่าผู้ใช้นี้มีรายการสั่งซื้ออยู่แล้วหรือไม่
-                $sql_check_order = "SELECT * FROM `Order` WHERE `user_id` = $user_id";
-                $result_check_order = $conn->query($sql_check_order);
-        
-                if ($result_check_order->num_rows == 0) {
-                    // ถ้าไม่มีรายการสั่งซื้อ ให้สร้างบันทึกใหม่ในตาราง "Order" โดยใช้ NOW() เพื่อรวมวันที่และเวลา
-                    $sql_insert_order = "INSERT INTO `Order` (`user_id`, `order_date`, `order_name`, `order_phone`, `order_address`)
-                                        VALUES ($user_id, NOW(), '$user_name', '$user_phone', '$user_address')";
-                    $conn->query($sql_insert_order);
+                if ($result_check_order_max->num_rows > 0) {
+                    $row_check_order_max = $result_check_order_max->fetch_assoc();
+                    $new_order_id = $row_check_order_max['order_id'];
                 }
+            } 
+            if($result_check_order->num_rows == 0){
+                // ถ้าไม่มีรายการสั่งซื้อ ให้สร้างบันทึกใหม่ในตาราง "Order" โดยใช้ NOW() เพื่อรวมวันที่และเวลา
+                $sql_insert_order = "INSERT INTO `Order` (`user_id`, `order_date`, `order_name`, `order_phone`, `order_address`)
+                    VALUES (?, NOW(), ?, ?, ?)";
+                $stmt_insert_order = $conn->prepare($sql_insert_order);
+                $stmt_insert_order->bind_param("isss", $user_id, $user_name, $user_phone, $user_address);
+                $stmt_insert_order->execute();
+                // ดึง `order_id` ที่เพิ่งสร้าง
+                $new_order_id = $stmt_insert_order->insert_id;
+            }
+
+            
+            header("Location: home.php?user_name=$user_name&order_id=$new_order_id");
+            exit();
+        }
         
-                header("Location: home.php?user_name=$user_name");
-                exit();
             } else {
                 echo '<div class="alert alert-danger text-center" role="alert">เข้าสู่ระบบไม่สำเร็จ</div>';
             }
         }  
-    }
     $conn->close();
 ?>
 <!DOCTYPE html>

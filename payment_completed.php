@@ -10,33 +10,74 @@ $change_amount = isset($_SESSION['change_amount']) ? $_SESSION['change_amount'] 
 
 if (isset($_GET['user_name']) && isset($_GET['order_id']) && isset($_GET['total'])) {
     $user_name = $_GET['user_name'];
-    $order_id = $_GET['order_id'];
+    $new_order_id = $_GET['order_id'];
     $total = $_GET['total'];
 
     $update_order_sql = "UPDATE `Order` SET payment_status = 'ชำระเงินแล้ว', status = '1', total = ? WHERE order_id = ?";
     $stmt_update_order = $conn->prepare($update_order_sql);
-    $stmt_update_order->bind_param("ii", $total, $order_id);
+    $stmt_update_order->bind_param("ii", $total, $new_order_id);
     $stmt_update_order->execute();
-    }
 
-
-if (isset($_GET['user_name']) && isset($_GET['order_id']) && isset($_GET['total'])) {
-    $user_name = $_GET['user_name'];
-    $order_id = $_GET['order_id'];
-    $total = $_GET['total'];
-
-    $message = "ขอบคุณ $user_name ที่ใช้บริการเรา และคุณชำระเงินทั้งหมด: " . number_format($total, 0) . " บาท";
+    // สร้างข้อความที่แสดงหมายเลขออร์เดอร์ใหม่
+    $message = "ขอบคุณ $user_name ที่ใช้บริการเรา และคุณชำระเงินทั้งหมด: " . number_format($total, 0) . " บาท หมายเลขออร์เดอร์ใหม่คือ: $new_order_id";
 
     // ทำการล้าง session เพื่อเคลียร์ข้อมูลที่ไม่จำเป็น
     session_unset();
     session_destroy();
-} else {
-    // หากไม่มีข้อมูลผู้ใช้หรือหมายเลขออร์เดอร์ที่ส่งมา
-    $message = "เกิดข้อผิดพลาดในการประมวลผล";
 }
 
-?>
+if (isset($_GET['user_name']) && isset($_GET['order_id']) && isset($_GET['total']) && isset($_POST['action'])) {
+    $action = $_POST['action'];
+    $user_name = $_GET['user_name'];
+    $new_order_id = $_GET['order_id'];
+    $total = $_GET['total'];
 
+    if ($action === 'go_home') {
+
+        // สร้าง `order_id` ใหม่ เพื่อรับออเดอร์ต่อไป
+        $order_id = createNewOrder($user_name);
+
+        if (isset($new_order_id)) {
+            header("Location: home.php?user_name=" . $user_name . "&order_id=" . $order_id);
+            exit();
+        } else {
+            // หากไม่สามารถสร้าง `order_id` ใหม่ได้
+            $message = "เกิดข้อผิดพลาดในการประมวลผล";
+        }
+    }
+}
+
+// ฟังก์ชันสร้าง `order_id` ใหม่
+function createNewOrder($user_name) {
+    global $conn;
+
+    // ค้นหา `user_id`, `user_phone`, และ `user_address` โดยใช้ชื่อผู้ใช้
+    $user_info_sql = "SELECT user_id, phone, address FROM User WHERE user_name = ?";
+    $stmt_user_info = $conn->prepare($user_info_sql);
+    $stmt_user_info->bind_param("s", $user_name);
+    $stmt_user_info->execute();
+    $result_user_info = $stmt_user_info->get_result();
+
+    if ($result_user_info->num_rows > 0) {
+        $row = $result_user_info->fetch_assoc();
+        $user_id = $row['user_id'];
+        $user_phone = $row['phone'];
+        $user_address = $row['address'];
+
+        // เพิ่ม `order_id` ใหม่
+        $add_order_sql = "INSERT INTO `Order` (`user_id`, `order_date`, `order_name`, `order_phone`, `order_address`)
+                          VALUES (?, NOW(), ?, ?, ?)";
+        $stmt_add_order = $conn->prepare($add_order_sql);
+        $stmt_add_order->bind_param("isss", $user_id, $user_name, $user_phone, $user_address);
+        $stmt_add_order->execute();
+
+        // คืนค่า `order_id` ใหม่
+        return $stmt_add_order->insert_id;
+    }
+
+    return null;
+}
+?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -50,76 +91,18 @@ if (isset($_GET['user_name']) && isset($_GET['order_id']) && isset($_GET['total'
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<div class="navbar">
-     <div class="logo">
-     <a href="home.php?user_name=<?php echo $user_name; ?>">
-         <img src="css/LOGOpizza.png"alt="">
-     </a>
-     </div>
-     <div class="basket">
-     <a class="btn btn-box" href="order.php?user_name=<?php echo $user_name; ?>">
-         <i class="bi bi-box2-fill"></i>
-            <?php
-                    // ดึงข้อมูลออเดอร์จากฐานข้อมูล
-                $sql = "SELECT `Order`.*, SUM(Basket.amount * Item.Price) AS total_amount
-                FROM `Order`
-                INNER JOIN User ON `Order`.user_id = User.user_id
-                LEFT JOIN Basket ON `Order`.order_id = Basket.order_id
-                LEFT JOIN Item ON Basket.item_id = Item.item_id
-                WHERE User.user_name = ?
-                GROUP BY `Order`.order_id
-                ORDER BY `Order`.order_id DESC";
-
-                $stmt = $conn->prepare($sql);
-                $stmt->bind_param("s", $user_name);
-                $stmt->execute();
-                $result = $stmt->get_result();
-
-                // นับจำนวนรายการออเดอร์
-                $order_count = $result->num_rows;
-
-                if ($order_count > 0){
-                    echo '<span class="order-count">' .$order_count. '</span>';
-                }
-            ?>
-           
-    </a>
-
-         <a class="btn btn-basket" href="basket.php?user_name=<?php echo $user_name; ?>">
-             <i class="bi bi-basket-fill"></i>
-             <?php
-                         // ดึงจำนวนสินค้าในตะกร้าของผู้ใช้
-                $sql_count_items = "SELECT COUNT(*) AS item_count FROM Basket
-                INNER JOIN `Order` ON Basket.order_id = `Order`.order_id
-                INNER JOIN User ON `Order`.user_id = User.user_id
-                WHERE User.user_name = ?";
-                $stmt_count_items = $conn->prepare($sql_count_items);
-                $stmt_count_items->bind_param("s", $user_name);
-                $stmt_count_items->execute();
-                $result_count_items = $stmt_count_items->get_result();
-
-                    if ($result_count_items->num_rows > 0) {
-                        $count_row = $result_count_items->fetch_assoc();
-                        $item_count = $count_row['item_count'];
-                        echo '<span class="item-count">' . $item_count . '</span>';
-                    }
-                ?>
-          </a>
-     </div>
-     <div class="nav-user">
-        <a class="user-image" href="login.php">
-            <i class="bi bi-person-circle"></i>
-        </a>
-        <a class="user-name" href="login.php"style="text-decoration: none;" >
-           <h1>สวัสดี, <?php echo $user_name; ?>!</h1>
-        </a>
-     </div>
- </div>
+<?php
+include "navbar.php";
+?>
 <div class="container mt-5">
     <div class="text-center">
         <i class="bi bi-check-circle text-success" style="font-size: 48px;"></i>
         <h1 class="mt-3">สั่งออร์เดอร์เสร็จสิ้น</h1>
         <p><?php echo $message; ?></p>
+        <!-- เพิ่มลิงก์ไปหน้าหลัก -->
+        <form method="post" action="">
+            <button class="btn btn-primary" name="action" value="go_home">กลับหน้าหลัก</button>
+        </form>
     </div>
 </div>
 </body>

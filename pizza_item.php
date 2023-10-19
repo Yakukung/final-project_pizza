@@ -150,7 +150,6 @@ if (isset($_GET['pizza_id']) && isset($_GET['user_name']) && isset($_GET['order_
                     <label for="size_id">เลือกขนาด:</label>
                     <select id="size_id" name="size_id" class="form-control" required onchange="calculatetotalPrice()">
                         <?php
-                        // สร้างลูปเพื่อแสดงตัวเลือกขนาด
                         $sizes = [
                             ['id' => 1, 'name' => 'S', 'price' => 0],
                             ['id' => 2, 'name' => 'M', 'price' => 10],
@@ -167,7 +166,6 @@ if (isset($_GET['pizza_id']) && isset($_GET['user_name']) && isset($_GET['order_
                     <label for="crust_id">เลือกขอบ:</label>
                     <select id="crust_id" name="crust_id" class="form-control" required onchange="calculatetotalPrice()">
                         <?php
-                        // สร้างลูปเพื่อแสดงตัวเลือกขอบ
                         $crusts = [
                             ['id' => 1, 'name' => 'บางกรอบ', 'price' => 0],
                             ['id' => 2, 'name' => 'หนานุ่ม', 'price' => 10],

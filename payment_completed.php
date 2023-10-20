@@ -19,7 +19,7 @@ if (isset($_GET['user_name']) && isset($_GET['order_id']) && isset($_GET['total'
     $stmt_update_order->execute();
 
     // สร้างข้อความที่แสดงหมายเลขออร์เดอร์ใหม่
-    $message = "ขอบคุณ $user_name ที่ใช้บริการเรา และคุณชำระเงินทั้งหมด: " . number_format($total, 0) . " บาท หมายเลขออร์เดอร์ใหม่คือ: $new_order_id";
+    $message = "ขอบคุณ $user_name ที่ใช้บริการเรา และคุณชำระเงินทั้งหมด: " . number_format($total, 0) . " บาท";
 
     // ทำการล้าง session เพื่อเคลียร์ข้อมูลที่ไม่จำเป็น
     session_unset();

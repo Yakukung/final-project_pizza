@@ -23,7 +23,6 @@ require_once "dbconfig.php";
 <?php
     include "navbar.php";
 ?>
-
  <div class="container-advert" style="margin-top: 1rem; width: 100%;">
     <div class="slideshow-grid">
         <div class="slide">

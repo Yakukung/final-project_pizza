@@ -1,8 +1,8 @@
 <?php
-$servername = "localhost";
-$user_name = "project_pizza";
-$password = "abc123";
-$dbname = "project_pizza";
+$servername = "202.28.34.197";
+$user_name = "web66_65011212083";
+$password = "65011212083@csmsu";
+$dbname = "web66_65011212083";
 
 $conn = new mysqli($servername, $user_name, $password, $dbname);
 

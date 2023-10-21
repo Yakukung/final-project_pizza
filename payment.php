@@ -119,7 +119,7 @@ if (isset($_GET['user_name']) && isset($_GET['total']) && isset($_GET['order_id'
                         <th>รูปสินค้า</th>
                         <th>ชื่อพิซซ่า</th>
                         <th>ขนาด</th>
-                        <th>เสิร์ฟ</th>
+                        <th>ขอบ</th>
                         <th>จำนวน</th>
                         <th>ราคารวม</th>
                     </tr>

@@ -70,7 +70,7 @@ if (isset($_GET['user_name']) && isset($_GET['new_order_id'])) {
                     <h4>รหัสออร์เดอร์: ' . $row['order_id'] . '</h4>
                     <p>วันที่สั่งซื้อ: ' . $row['order_date'] . '</p>
                     <p>สถานะการจัดส่ง: ' . $delivery_icon . ' <span class="' . $delivery_color . '">' . ($delivery_status == 1 ? 'ยังไม่จัดส่ง' : 'จัดส่งแล้ว') . '</span></p>
-                    <p>สถานะชำระเงิน: ' . $payment_icon . ' <span class="' . $payment_color . '">' . ($payment_status == 1 ? 'ยังไม่ชำระเงิน' : 'ชำระเงินแล้ว') . '</span></p>';
+                    <p>สถานะชำระเงิน: ' . $payment_icon . ' <span class="' . $payment_color . '">' . ($payment_status == "ยังไม่ชำระเงิน" ? 'ยังไม่ชำระเงิน' : 'ชำระเงินแล้ว') . '</span></p>';
 
 
 

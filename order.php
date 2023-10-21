@@ -2,7 +2,7 @@
 require_once "dbconfig.php";
 session_start();
 
-if (isset($_GET['user_name']) && isset($_GET['order_id'])) {
+if (isset($_GET['user_name']) && isset($_GET['new_order_id'])) {
     $user_name = $_GET['user_name'];
     $new_order_id = $_GET['new_order_id'];
 

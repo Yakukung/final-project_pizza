@@ -133,6 +133,9 @@ if (isset($_GET['pizza_id']) && isset($_GET['user_name']) && isset($_GET['order_
 <?php
     include "navbar.php";
 ?>
+<?php
+    include "btn_back_home.php";
+?>
  </div>
 <div class="container-pizza_item">
     <div class="card-pizza_item">

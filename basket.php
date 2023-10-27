@@ -119,6 +119,9 @@ if (isset($_GET['user_name']) && isset($_GET['order_id'])) {
 <?php
     include "navbar.php";
 ?>
+<?php
+    include "btn_back_home.php";
+?>
 <div class="container mt-5" style="background-color: #FAFAFA; padding: 2rem; border-radius: 65px;">
     <h2 class="text-center mb-4">ตะกร้าสินค้า</h2>
     <?php
@@ -180,7 +183,7 @@ if (isset($_GET['user_name']) && isset($_GET['order_id'])) {
                     </td>
                     <td>
                         <form method="post" action="payment.php?user_name=' . $user_name . '&total=' . $total . '&order_id=' . $new_order_id . '">
-                            <button type="submit" class="btn btn-primary" name="user_name" value="' . $user_name . '">ชำระเงิน</button>
+                            <button type="submit" class="btn btn-primary" name="user_name" value="' . $user_name . '" >ชำระเงิน</button>
                         </form>
                     </td>
                 </tr>

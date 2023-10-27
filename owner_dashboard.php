@@ -2,50 +2,9 @@
 require_once "dbconfig.php";
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
 
-// ดึงรายการออร์เดอร์ที่มีค่า total ไม่เป็น NULL
-$sql = "SELECT `Order`.order_id, User.user_name,
-                GROUP_CONCAT(Pizza.pizza_name SEPARATOR ', ') as pizza_names, 
-                GROUP_CONCAT(Size.size_name SEPARATOR ', ') as size_names, 
-                GROUP_CONCAT(Crust.crust_name SEPARATOR ', ') as crust_names,
-                GROUP_CONCAT(Basket.amount SEPARATOR ', ') as amounts,
-                GROUP_CONCAT(Item.Price SEPARATOR ', ') as price,
-                `Order`.total, `Order`.payment_status, `Order`.status 
-    FROM `Order`
-    INNER JOIN User ON `Order`.user_id = User.user_id
-    INNER JOIN Basket ON `Order`.order_id = Basket.order_id
-    INNER JOIN Item ON Basket.item_id = Item.item_id
-    INNER JOIN Pizza ON Item.pizza_id = Pizza.pizza_id
-    INNER JOIN Size ON Item.size_id = Size.size_id
-    INNER JOIN Crust ON Item.crust_id = Crust.crust_id
-    WHERE `Order`.total IS NOT NULL
-    GROUP BY `Order`.order_id";
+$owner_name = $_GET['user_name'];
 
-$result = $conn->query($sql);
-
-$user_name = $_GET['user_name']; // ต้องการ user_name ใน URL
-
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["order_id"]) && isset($_POST["payment_status"]) && isset($_POST["status"])) {
-    $order_id = $_POST["order_id"];
-    $payment_status = $_POST["payment_status"];
-    $status = $_POST["status"];
-
-    // คำสั่ง SQL สำหรับอัปเดตสถานะการชำระเงินในตาราง Order
-    $sql_update_status = "UPDATE `Order` SET payment_status = ?, status = ? WHERE order_id = ?";
-    $stmt_update_status = $conn->prepare($sql_update_status);
-    $stmt_update_status->bind_param("ssi", $payment_status, $status, $order_id);
-
-    if ($stmt_update_status->execute()) {
-        
-        header("Location: owner_dashboard.php?user_name=" . $user_name);
-        exit();
-    } else {
-        echo '<div class="alert alert-danger text-center" role="alert">ไม่สามารถอัปเดตสถานะได้</div>';
-    }
-
-    $stmt_update_status->close();
-}
 ?>
 
 <!DOCTYPE html>
@@ -53,95 +12,122 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["order_id"]) && isset($
 
 <head>
     <meta charset="UTF-8">
-    <title>รายการออร์เดอร์</title>
+    <title>เลือกลูกค้าเพื่อดูรายการออร์เดอร์</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="css/style.css">
-</head>
-<body>
-<div class="navbar">
-    <div class="logo">
-        <a href="owner_dashboard.php?user_name=<?php echo $user_name; ?>">
-            <img src="css/LOGOpizza.png" alt="">
-        </a>
-    </div>
-    <div class="nav-user">
-        <a class="user-image" href="login.php">
-            <i class="bi bi-person-circle"></i>
-        </a>
-        <a class="user-name" href="login.php" style="text-decoration: none;">
-            <h1>สวัสดี, <?php echo $user_name; ?>!</h1>
-        </a>
-    </div>
-</div>
-<div class="container mt-5">
-    <h1>รายการที่ลูกค้าสั่งซื้อทั้งหมด</h1>
-    <?php
-    if ($result->num_rows > 0) {
-        while ($row = $result->fetch_assoc()) {
-            echo '<div class="card mb-5" style="background-color: #FAFAFA; padding: 2rem; border-radius: 65px; border: none; margin: 1rem 10rem">';
-            echo '<div class="card-body">';
-            echo '<h5 class="card-title" style="font-size: 2rem;">Order ID: ' . $row["order_id"] . '</h5>';
-            echo '<p class="card-text" style="font-size: 1.2rem;">ชื่อลูกค้า: ' . $row["user_name"] . '</p>';
-
-            // รายการพิซซ่าแยกเป็นคอลัมเพื่อความชัดเจน
-            $pizza_names = explode(', ', $row['pizza_names']);
-            $size_names = explode(', ', $row['size_names']);
-            $crust_names = explode(', ', $row['crust_names']);
-            $amounts = explode(', ', $row['amounts']);
-            $price = explode(', ', $row['price']);
-
-            // แสดงรายการพิซซ่าในตาราง
-            echo '<table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>ชื่อพิซซ่า</th>
-                        <th>ขนาด</th>
-                        <th>ขอบ</th>
-                        <th>จำนวน</th>
-                        <th>ราคา</th>
-                    </tr>
-                </thead>
-                <tbody>';
-
-            for ($i = 0; $i < count($pizza_names); $i++) {
-                echo '<tr>
-                        <td>' . $pizza_names[$i] . '</td>
-                        <td>' . $size_names[$i] . '</td>
-                        <td>' . $crust_names[$i] . '</td>
-                        <td>' . $amounts[$i] . '</td>
-                        <td>' . $price[$i] . '</td>
-                    </tr>';
-            }
-
-            echo '</tbody></table>';
-
-            echo '<p class="card-text">ยอดรวมทั้งหมด: ' . $row["total"] . '</p>';
-            echo "<form method='POST' action='owner_dashboard.php?user_name=$user_name'>";
-            echo '<div class="row justify-content-center">';
-            echo "<input type='hidden' name='order_id' value='" . $row["order_id"] . "'>";
-            echo '<div class="col-3">';
-            echo "<label for='payment_status'>สถานะชำระเงิน</label>";
-            echo "<select class='form-control' name='payment_status'>";
-            echo "<option value='ยังไม่ชำระเงิน' " . ($row["payment_status"] == "ยังไม่ชำระเงิน" ? "selected" : "") . ">ยังไม่ชำระเงิน</option>";
-            echo "<option value='ชำระเงินแล้ว' " . ($row["payment_status"] == "ชำระเงินแล้ว" ? "selected" : "") . ">ชำระเงินแล้ว</option>";
-            echo "</select>";
-            echo '</div>';
-            echo '<div class="col-3">';
-            echo "<label for='status'>สถานะจัดส่ง</label>";
-            echo "<select class='form-control' name='status'>";
-            echo "<option value='1' " . ($row["status"] == "1" ? "selected" : "") . ">ยังไม่ส่ง</option>";
-            echo "<option value='2' " . ($row["status"] == "2" ? "selected" : "") . ">ส่งแล้ว</option>";
-            echo "</select>";
-            echo '</div>';
-            echo "<button type='submit' style='margin: auto;' class='btn btn-primary'>บันทึก</button>";
-            echo '</div>';
-            echo '</form>';
-            echo '</div>';
-            echo '</div>';
-        }
-    } else {
-        echo "<p>ไม่มีรายการสั่งซื้อ</p>";
+    <style>
+    .card-grid {
+        display: grid;
+        grid-template-columns: auto auto auto auto;
+        grid-gap: 20px;
     }
-    ?>
+
+    .customer-card {
+        margin-top: 2rem;
+        padding: 1rem;
+        transition: transform 0.6s, box-shadow 0.3s;
+        box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.2);
+        text-align: center;
+        border-radius: 30px;
+    }
+
+    .customer-card:hover {
+        transform: scale(1.10);
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.4);
+    }
+
+    .order-count{
+            width: 23px;
+            text-align: center;
+            position: absolute;
+            transform: translate(-63%, -50%);
+            font-size: 0.9rem; background-color: red;
+            color: white;
+            border-radius: 90px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="navbar">
+        <div class="logo">
+            <a href="owner_dashboard.php?user_name=<?php echo $owner_name; ?>">
+                <img src="css/LOGOpizza.png" alt="">
+            </a>
+        </div>
+        <div class="nav-user">
+            <a class="user-image">
+                <i class="bi bi-person-circle"></i>
+            </a>
+            <a class="user-name">
+                <h3>สวัสดี, <?php echo $owner_name; ?>!</h3>
+            </a>
+            <a class="logout" href="javascript:void(0);" style="text-decoration: none;" onclick="confirmLogout()">
+                <p>ออกจากระบบ</p>
+            </a>
+        </div>
+</div>
+    <div class="container mt-5">
+        <h1>เลือกลูกค้าเพื่อดูรายการออร์เดอร์</h1>
+        <div class="card-grid">
+            <?php
+            // เรียกคำ SQL ที่เลือกลูกค้า (ไม่ใช่เจ้าของร้าน)
+            $sql = "SELECT user_name FROM User WHERE user_name != 'เจ้าของร้าน'";
+            $result = $conn->query($sql);
+
+            if ($result->num_rows > 0) {
+                while ($row = $result->fetch_assoc()) {
+                    $customer_name = $row["user_name"];
+
+                    // ดึงข้อมูลออเดอร์จากฐานข้อมูล
+                    $sql = "SELECT `Order`.*, COALESCE(SUM(Basket.amount * Item.Price), 0) AS total_amount
+                    FROM `Order`
+                    INNER JOIN User ON `Order`.user_id = User.user_id
+                    LEFT JOIN Basket ON `Order`.order_id = Basket.order_id
+                    LEFT JOIN Item ON Basket.item_id = Item.item_id
+                    WHERE User.user_name = ? AND `Order`.total IS NOT NULL
+                    GROUP BY `Order`.order_id
+                    ORDER BY `Order`.order_id ASC";
+
+                    $stmt = $conn->prepare($sql);
+                    $stmt->bind_param("s", $customer_name);
+                    $stmt->execute();
+                    $result_order = $stmt->get_result();
+
+                    // นับจำนวนรายการออเดอร์
+                    $order_count = $result_order->num_rows;
+
+                    echo '<div class="customer-card">';
+                    echo "<h3>$customer_name</h3>";
+                    echo '<button class="btn btn-primary" onclick="window.location.href=\'owner_dashboard_detail.php?owner_name=' . $owner_name . '&customer_name=' . $customer_name . '\'">ดูรายการออร์เดอร์</button>';
+
+                    // เช็คว่ามีรายการออร์เดอร์หรือไม่
+                    if ($order_count > 0) {
+                        echo '<span class="order-count">' . $order_count . '</span>';
+                    } else {
+                        echo '<span class="order-count">0</span>';
+                    }
+
+                    echo '</div>';
+                }
+            } else {
+                echo "<p>ไม่มีข้อมูลลูกค้า</p>";
+            }
+            ?>
+        </div>
+    </div>
+
+</body>
+<script>
+function confirmLogout() {
+    var result = confirm("คุณแน่ใจหรือไม่ที่จะออกจากระบบ?");
+    if (result) {
+        // หากผู้ใช้คลิก OK ให้นำไปยังหน้าล็อกเอาท์
+        window.location.href = "login.php";
+    }
+}
+</script>
+
+</html>

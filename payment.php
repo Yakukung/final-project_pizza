@@ -92,6 +92,9 @@ if (isset($_GET['user_name']) && isset($_GET['total']) && isset($_GET['order_id'
 <?php
     include "navbar.php";
 ?>
+<?php
+    include "btn_back_home.php";
+?>
 <div class="container mt-5">
     <form method="post">
         <div class="row justify-content-center" style="background-color: #FAFAFA; padding: 2rem; border-radius: 65px; margin: 2rem;">

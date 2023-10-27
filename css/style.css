@@ -14,18 +14,32 @@ body {
     display: flex;
     justify-content: space-between; 
     & .nav-user{
+        margin-top: 0.5rem;
         font-size: 1rem;
-        & h1{
-            font-size: 1rem;
-            margin-right: 3rem;
-            color: #f7b82f;
-        }
+        text-align: center;
+        margin-right: 2rem;
         & .user-image{
-            padding-left: 3.5rem;
             font-size: 2rem;
             color: #F5F5F7;
         }
+        & .user-name{
+            color: #f7b82f;
+            text-decoration: none;
+
+            & h3{
+                font-size: 1rem;
+            }
+        }
+        & .logout {
+            text-decoration: none;
+            font-weight: bold;
+            color: #ffffff;
+            & p{
+                font-size: 0.75rem;
+            }
+        }
     }
+    
     & .logo img{
         width: 100px;
         margin-left: 3rem;

@@ -15,7 +15,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $row = $result->fetch_assoc();
         $user_name = $row['user_name'];
         $user_id = $row['user_id'];
-
+        $user_phone = $row['phone']; // เพิ่มค่า phone
+        $user_address = $row['address']; // เพิ่มค่า address
+    
         if ($position == '1') {
             header("Location: owner_dashboard.php?user_name=$user_name");
             exit();
@@ -25,20 +27,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $stmt_check_order->bind_param("i", $user_id);
             $stmt_check_order->execute();
             $result_check_order = $stmt_check_order->get_result();
-        
+    
             if ($result_check_order->num_rows > 0) {
-                $stmt_check_order_max = $conn->prepare("SELECT MAX(order_id) AS order_id FROM `Order` WHERE `user_id` = ?");
+                $stmt_check_order_max = $conn->prepare("SELECT MAX(order_id) AS order_id , total FROM `Order` WHERE `user_id` = ?");
                 $stmt_check_order_max->bind_param("i", $user_id);
                 $stmt_check_order_max->execute();
                 $result_check_order_max = $stmt_check_order_max->get_result();
 
-                if ($result_check_order_max->num_rows > 0) {
                     $row_check_order_max = $result_check_order_max->fetch_assoc();
                     $new_order_id = $row_check_order_max['order_id'];
-                }
-            } 
-            if($result_check_order->num_rows == 0){
-                // ถ้าไม่มีรายการสั่งซื้อ ให้สร้างบันทึกใหม่ในตาราง "Order" โดยใช้ NOW() เพื่อรวมวันที่และเวลา
+                    }
+            if ($result_check_order->num_rows == 0) {
+                // ถ้าไม่มีรายการสั่งซื้อ ให้สร้างบันทึกใหม่ในตาราง "Order"
                 $sql_insert_order = "INSERT INTO `Order` (`user_id`, `order_date`, `order_name`, `order_phone`, `order_address`)
                     VALUES (?, NOW(), ?, ?, ?)";
                 $stmt_insert_order = $conn->prepare($sql_insert_order);
@@ -47,15 +47,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 // ดึง `order_id` ที่เพิ่งสร้าง
                 $new_order_id = $stmt_insert_order->insert_id;
             }
-
-            
             header("Location: home.php?user_name=$user_name&order_id=$new_order_id");
             exit();
         }
-        
-            } else {
-                echo '<div class="alert alert-danger text-center" role="alert">เข้าสู่ระบบไม่สำเร็จ</div>';
-            }
+    } else {
+        echo '<div class="alert alert-danger text-center" role="alert">เข้าสู่ระบบไม่สำเร็จ</div>';
+    }
+    
         }  
     $conn->close();
 ?>
@@ -111,4 +109,4 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         </div>
     </div>
 </body>
-</html>
+</html> 

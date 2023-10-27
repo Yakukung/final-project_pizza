@@ -46,9 +46,12 @@ if (isset($_GET['user_name']) && isset($_GET['new_order_id'])) {
     }
 </style>
 <body>
-    <?php
+<?php
     include "navbar.php";
-    ?>
+?>
+<?php
+    include "btn_back_home.php";
+?>
     <div class="container mt-5">
         <h2 class="text-center mb-4" style="font-weight: 900; font-size: 3rem;;">รายการสั่งซื้อของคุณ</h2>
         <?php
@@ -111,7 +114,7 @@ if (isset($_GET['user_name']) && isset($_GET['new_order_id'])) {
                             <td>' . $item_row['size_name'] . '</td>
                             <td>' . $item_row['crust_name'] . '</td>
                             <td>' . $item_row['amount'] . '</td>
-                            <td>' . ($item_row['Price'] * $item_row['amount']) . '</td>
+                            <td>' . ($item_row['Price']) . '</td>
                         </tr>';
                 }
 
